@@ -1,0 +1,113 @@
+DONJON DE L'OIE — jeu de plateau « party game » en voxels, pour Unreal Engine 5.7
+=================================================================================
+
+C'est le jeu de la version Unity (v4), porté à l'identique : mêmes règles, mêmes bots, mêmes modèles voxel, même île
+générée, mêmes animations, même interface, mêmes sons. Tout le code C# du jeu a été traduit, fichier par fichier, en
+C++ ; seule une mince couche (dossier Source/DonjonDeLOie/Unreal) parle à Unreal. Étape 1 (version corrigée « 1b ») :
+le jeu jouable. Les outils d'édition (catalogue, éditeur de cartes) sont l'étape 2 ; ici, le jeu utilise le catalogue et
+la carte d'origine.
+
+CE QU'IL FAUT
+• Unreal Engine 5.7 (Epic Games Launcher).
+• Visual Studio 2022 (version 17.14 conseillée par Epic pour Unreal 5.7, 17.8 au minimum), avec la charge de travail
+  « Développement de jeux en C++ » (cochez aussi « Unreal Engine installer » et un SDK Windows 10 ou 11 dans les
+  détails de cette charge). Visual Studio 2026 n'est pas dans la liste d'Epic pour Unreal 5.7 : gardez 2022.
+• Windows 10 ou 11.
+
+OUVRIR LE PROJET — trois étapes
+1. Décompressez l'archive où vous voulez (un chemin court, sans caractères spéciaux, est plus sûr : par exemple
+   C:\Projets). Prenez toujours un dossier neuf : ne mélangez pas une nouvelle version avec une ancienne.
+2. Double-cliquez DonjonDeLOie.uproject. Unreal annonce que les modules « DonjonDeLOie » et « DonjonDeLOieEditor »
+   manquent et propose de les compiler : répondez Oui. La première compilation prend quelques minutes.
+   Si elle échoue (« could not be compiled ») : cliquez OK, ouvrez l'Explorateur de fichiers, tapez
+   %LOCALAPPDATA%\UnrealBuildTool dans la barre d'adresse puis Entrée, et envoyez-moi le fichier Log.txt de ce dossier
+   (il contient les erreurs de la dernière compilation) : je corrige d'après lui.
+3. À la première ouverture de l'éditeur, le module d'édition crée les matériaux du jeu dans
+   Content/DonjonDeLOie/Materiaux (sept matériaux ; le journal Output Log affiche « Matériau M_DD_Voxel créé. »…).
+   Unreal compile ensuite leurs shaders : attendez que le compteur en bas à droite ait fini. Puis bouton Play
+   (Alt+P). L'écran titre apparaît, l'île tourne derrière.
+
+DANS L'ÉDITEUR, ATTENTION À ÉCHAP
+Échap ouvre le menu du jeu, mais dans l'éditeur Échap arrête aussi la partie (raccourci « Stop » d'Unreal). Deux
+solutions : jouer dans une fenêtre à part (flèche à côté de Play › « Standalone Game »), ou changer ce raccourci
+(Edit › Editor Preferences › General › Keyboard Shortcuts, cherchez « Stop », mettez par exemple Maj+Échap).
+Maj+F1 rend la souris à l'éditeur pendant une partie.
+
+COMMANDES (comme dans la version Unity)
+Souris : tout se joue aux boutons ; on peut aussi cliquer directement une case lumineuse quand il faut en choisir une.
+Molette : zoom · clic droit glissé ou flèches gauche/droite : tourner · clic milieu glissé : déplacer la vue ·
+Espace : tout le plateau · Échap : menu (pause, règles, volumes).
+Mini-jeu de l'évadé : clic gauche sur un visage · molette : zoomer vers la souris · Échap : pause (le temps s'arrête).
+
+LE JEU
+Tout est expliqué dans le jeu (bouton « Règles » de l'écran titre) et dans le LISEZMOI de la version Unity : 2 à 6
+aventuriers (humains ou bots), une boucle de 40 cases et trois raccourcis, duels, monstres, le Dragonnoie, la nuit et
+ses quatre événements, les quêtes (dont le mini-jeu de l'évadé), la boutique, six classes, victoire au niveau visé.
+
+EMPAQUETER (un jeu à donner)
+Menu Platforms › Windows › Package Project. Les matériaux du jeu sont toujours inclus (réglage « Directories to
+always cook » : /Game/DonjonDeLOie). Le jeu empaqueté démarre directement sur l'écran titre.
+
+RÉGLAGES (console d'Unreal : touche ² ou `, puis la commande)
+• dd.Exposition 0.5 : image plus claire (en diaphragmes ; -0.5 : plus sombre). Le jeu règle lui-même l'exposition
+  (plus sombre la nuit) ; ce réglage s'y ajoute.
+• dd.DistanceOmbres 120 : ombres du soleil jusqu'à 120 m de la caméra (80 par défaut ; pris en compte à la partie
+  suivante).
+• dd.Faces.OrdreUnity 1 : seulement si les objets paraissaient vus de l'intérieur (faces arrière visibles, terrain
+  transparent) — l'ordre des sommets des triangles serait alors à garder tel qu'Unity le donne.
+• dd.RecreerMateriaux : recrée les matériaux (si vous les avez modifiés ou supprimés).
+
+CE QUI EST IDENTIQUE, CE QUI DIFFÈRE
+Identique à la version Unity, au bit près dans les vérifications : les règles, les bots, chaque tirage au hasard, la
+génération de l'île et du décor, les modèles voxel (375 modèles), les animations, la mise en scène et ses temps, la
+mise en page de l'interface, les textes, les sons et la musique (synthétisés au lancement de la même façon).
+Différent, parce que c'est Unreal qui dessine : les ombres (cascades d'Unreal au lieu de celles d'URP), le rendu des
+couleurs (le « tone mapper » d'Unreal, proche de l'ACES d'URP), le halo, le flou de profondeur du mini-jeu de l'évadé,
+l'anticrénelage, et la police de l'interface (Roboto au lieu d'Arial : les retours à la ligne sont calculés avec la
+vraie police, ils peuvent tomber à un mot près ailleurs). Lumen est éteint : l'éclairage est celui du jeu d'origine
+(soleil, lampes, lumière ambiante en trois tons, brume linéaire).
+
+ORGANISATION DU CODE (Source/DonjonDeLOie)
+Le code du jeu porte les mêmes noms qu'en C# : Runtime/Monde/IleVue.cs est devenu Monde/IleVue.h et IleVue.cpp ; une
+classe partielle C# en plusieurs fichiers (DDJeu.Combat.cs…) a un seul en-tête et un .cpp par fichier C#.
+Noyau      les outils de C# en C++ standard : listes, dictionnaires, textes UTF-8, le générateur aléatoire de .NET
+           (mêmes tirages), les énumérateurs « yield return ».
+Moteur     un petit moteur qui imite ce que le jeu demandait à Unity : GameObject, composants, Transform, coroutines,
+           mathématiques (Vector3, Quaternion, Mathf…), maillages et matériaux, lumières, sons, souris et clavier,
+           et toute l'interface uGUI (ancres, mise en page des textes, boutons, survol…). Il ne dessine rien.
+Regles, Voxel, Modeles, Monde, Interface, Pilote, Cartes : le jeu, comme dans la version Unity.
+Unreal     la seule partie qui parle à Unreal :
+           DDModeJeu    le mode de jeu (choisi dans Config/DefaultEngine.ini) : il crée la scène au lancement ;
+           DDScene      l'acteur qui fait tourner le jeu image par image et montre ce qu'il construit : maillages
+                        procéduraux, matériaux, soleil et lampes, caméra, brume et post-traitement, sons ;
+           SDDInterface le widget Slate qui peint l'interface ;
+           DDControleur, DDViewportClient  la souris et le clavier.
+Source/DonjonDeLOieEditor  le module d'édition (chargé seulement dans l'éditeur) : il crée les matériaux.
+Où régler : comme dans la version Unity (Regles/Donnees.cpp, Regles/Evenements.cpp, Regles/IA.cpp,
+Monde/Ambiance.cpp, Modeles/…), puis recompilez (bouton Compile de l'éditeur, ou Ctrl+Alt+F11).
+
+VÉRIFIÉ AVANT LIVRAISON (hors Unreal)
+• Le code du jeu (170 fichiers, 29 000 lignes) compile avec gcc et clang, avec les règles d'Unreal (sans exceptions ni RTTI,
+  avertissements traités comme des erreurs, aucun nom réservé par les macros d'Unreal ou de Windows).
+• Le jeu complet a tourné hors Unreal, image par image, dans 13 scénarios joués comme par un joueur : partie de bots,
+  partie humaine, à deux, à six, nuits forcées (chacun des quatre événements seul, et tous les deux tours), mini-jeu de
+  l'évadé joué par un humain et par les bots, carte faite dans l'éditeur, carte choisie dans le salon. Dans chacun,
+  l'état complet de la scène (chaque objet, sa position au bit près, ses composants, ses textes, ses couleurs) a été
+  comparé à celui de la version Unity C# toutes les 30 images : identique dans les 13 scénarios, jusqu'à la fin.
+• Les 21 captures d'écran d'une partie (scène 3D rendue hors moteur et interface) sont identiques octet pour octet à
+  celles de la version C#, avec gcc comme avec clang.
+• Les 375 modèles voxel (maillages, couleurs, icônes, portraits) sont identiques octet pour octet.
+• Première compilation réelle, chez vous (Visual Studio 2022 17.14, outils MSVC 14.44) : le code du jeu compilait ;
+  quatre fichiers de la couche Unreal avaient des erreurs (trois en-têtes d'Unreal à inclure, et UE_LOG, qui est un
+  bloc entre accolades et ne peut pas précéder un « else »). Ils sont corrigés, et l'imitation d'Unreal reproduit
+  désormais ces trois cas.
+• La couche Unreal et le module d'édition compilent contre une imitation de l'API d'Unreal 5.7, et leurs appels à
+  Unreal les plus délicats (Slate, textures, sons, lumières, post-traitement, matériaux, entrées) ont été vérifiés dans
+  la documentation d'Unreal 5.7. Ils n'ont jamais été lancés dans Unreal : s'il reste une erreur de compilation ou
+  d'édition des liens, envoyez-moi le Log.txt (étape 2 ci-dessus), je corrige.
+
+PAS ENCORE VU DANS UNREAL
+Dites-moi ce que donnent la compilation (le fichier Log.txt), la création des matériaux, et le premier Play :
+l'image (lumière, ombres, couleurs de la nuit, brume, halo), l'interface (tailles, police), les sons, la souris et le
+clavier, la fluidité. Si l'image est trop sombre ou trop claire, essayez dd.Exposition et dites-moi la valeur qui
+convient : je la mettrai par défaut.
